@@ -258,10 +258,15 @@ export async function changeOrchestratorModel(config, rl) {
 
   const providerDef = PROVIDERS[providerKey];
 
-  // Resolve API key
+  // Resolve API key — always ask, but allow reusing existing
   const envKey = providerDef.envKey;
-  let apiKey = process.env[envKey];
-  if (!apiKey) {
+  let apiKey;
+  const existingKey = process.env[envKey];
+  if (existingKey) {
+    const masked = existingKey.slice(0, 4) + '...' + existingKey.slice(-4);
+    const input = await ask(rl, chalk.cyan(`\n  ${providerDef.name} API key [Enter to keep ${masked}]: `));
+    apiKey = input.trim() || existingKey;
+  } else {
     const key = await ask(rl, chalk.cyan(`\n  ${providerDef.name} API key (${envKey}): `));
     if (!key.trim()) {
       console.log(chalk.yellow('\n  No API key provided. Orchestrator not changed.\n'));
@@ -298,8 +303,8 @@ export async function changeOrchestratorModel(config, rl) {
   config.orchestrator.model = modelId;
   config.orchestrator.api_key = apiKey;
 
-  // Save the key if it was newly entered
-  if (!process.env[envKey]) {
+  // Save the key if it changed
+  if (apiKey !== process.env[envKey]) {
     saveCredential(config, envKey, apiKey);
     console.log(chalk.dim('  API key saved.\n'));
   }
@@ -317,10 +322,15 @@ export async function changeBrainModel(config, rl) {
 
   const providerDef = PROVIDERS[providerKey];
 
-  // Resolve API key
+  // Resolve API key — always ask, but allow reusing existing
   const envKey = providerDef.envKey;
-  let apiKey = process.env[envKey];
-  if (!apiKey) {
+  let apiKey;
+  const existingKey = process.env[envKey];
+  if (existingKey) {
+    const masked = existingKey.slice(0, 4) + '...' + existingKey.slice(-4);
+    const input = await ask(rl, chalk.cyan(`\n  ${providerDef.name} API key [Enter to keep ${masked}]: `));
+    apiKey = input.trim() || existingKey;
+  } else {
     const key = await ask(rl, chalk.cyan(`\n  ${providerDef.name} API key (${envKey}): `));
     if (!key.trim()) {
       console.log(chalk.yellow('\n  No API key provided. Brain not changed.\n'));
@@ -349,8 +359,8 @@ export async function changeBrainModel(config, rl) {
   config.brain.model = modelId;
   config.brain.api_key = apiKey;
 
-  // Save the key if it was newly entered
-  if (!process.env[envKey]) {
+  // Save the key if it changed
+  if (apiKey !== process.env[envKey]) {
     saveCredential(config, envKey, apiKey);
     console.log(chalk.dim('  API key saved.\n'));
   }
