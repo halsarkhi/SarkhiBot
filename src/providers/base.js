@@ -107,7 +107,8 @@ export class BaseProvider {
       msg.includes('fetch failed') ||
       msg.includes('timed out') ||
       msg.includes('network socket disconnected') ||
-      msg.includes('other side closed')
+      msg.includes('other side closed') ||
+      msg.includes('Internal error')
     ) {
       return true;
     }
