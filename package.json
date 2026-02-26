@@ -1,0 +1,52 @@
+{
+  "name": "sarkhibot",
+  "version": "1.0.38",
+  "description": "SarkhiBot — AI engineering agent with full OS control",
+  "type": "module",
+  "author": "Mohammad Alsarkhi <halsarkhi1@gmail.com>",
+  "bin": {
+    "sarkhibot": "./bin/sarkhibot.js"
+  },
+  "scripts": {
+    "start": "node bin/sarkhibot.js start"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "telegram",
+    "anthropic",
+    "openai",
+    "gemini",
+    "groq",
+    "tools"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/halsarkhi/SarkhiBot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/halsarkhi/SarkhiBot/issues"
+  },
+  "homepage": "https://sarkhibot.io",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@google/genai": "^1.42.0",
+    "@octokit/rest": "^22.0.1",
+    "axios": "^1.13.5",
+    "boxen": "^8.0.1",
+    "chalk": "^5.4.1",
+    "commander": "^13.1.0",
+    "dotenv": "^16.4.7",
+    "gradient-string": "^3.0.0",
+    "js-yaml": "^4.1.0",
+    "node-telegram-bot-api": "^0.66.0",
+    "oauth-1.0a": "^2.2.6",
+    "openai": "^4.82.0",
+    "ora": "^8.1.1",
+    "puppeteer": "^24.37.3",
+    "simple-git": "^3.31.1",
+    "uuid": "^11.1.0",
+    "winston": "^3.17.0"
+  }
+}

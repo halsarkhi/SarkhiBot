@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SARKHI // Command Center</title>
+<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+<canvas id="particle-canvas"></canvas>
+<div class="scanlines"></div>
+
+<!-- ═══════ SIDEBAR ═══════ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 32 32" shape-rendering="crispEdges">
+      <!-- Pixel-art spiral vortex: 3 rings with rotating gaps -->
+      <!-- Outer ring — gap at top-right (1 o'clock) -->
+      <path fill="rgba(57,255,20,0.35)" d="M10,2h10v2h-10z M8,4h2v2h-2z M6,6h2v4h-2z M4,10h2v8h-2z M6,18h2v2h-2z M8,20h2v2h-2z M10,22h14v2h-14z M24,18h2v4h-2z M26,8h2v10h-2z M24,6h2v2h-2z"/>
+      <!-- Middle ring — gap at bottom-right (4 o'clock) -->
+      <path fill="rgba(57,255,20,0.6)" d="M12,8h8v2h-8z M10,10h2v10h-2z M20,10h2v6h-2z M18,18h2v2h-2z M12,20h6v2h-6z"/>
+      <!-- Inner core — L-shape spiral hint -->
+      <path fill="#39ff14" d="M14,14h4v2h-2v2h-2z"/>
+    </svg>
+  </div>
+
+  <div class="sidebar-nav">
+    <a class="nav-item active" href="#gauges" title="System">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      <span class="nav-label">SYS</span>
+    </a>
+    <a class="nav-item" href="#p-jobs" title="Jobs">
+      <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="5" rx="1"/><rect x="4" y="11" width="16" height="5" rx="1"/></svg>
+      <span class="nav-label">JOBS</span>
+    </a>
+    <a class="nav-item" href="#p-life" title="Life">
+      <svg viewBox="0 0 24 24"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+      <span class="nav-label">LIFE</span>
+    </a>
+    <a class="nav-item" href="#p-evo" title="Evolution">
+      <svg viewBox="0 0 24 24"><path d="M12 2v4m0 12v4M2 12h4m12 0h4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+      <span class="nav-label">EVO</span>
+    </a>
+    <a class="nav-item" href="#p-mem" title="Memory">
+      <svg viewBox="0 0 24 24"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44A2.5 2.5 0 0 1 2 17.5a2.5 2.5 0 0 1 .72-1.76A2.5 2.5 0 0 1 5 12a2.5 2.5 0 0 1-2-4 2.5 2.5 0 0 1 4.5-1.5"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44A2.5 2.5 0 0 0 22 17.5a2.5 2.5 0 0 0-.72-1.76A2.5 2.5 0 0 0 19 12a2.5 2.5 0 0 0 2-4 2.5 2.5 0 0 0-4.5-1.5"/></svg>
+      <span class="nav-label">MEM</span>
+    </a>
+    <a class="nav-item" href="#p-logs" title="Logs">
+      <svg viewBox="0 0 24 24"><path d="M4 17l6-6-6-6M12 19h8"/></svg>
+      <span class="nav-label">LOGS</span>
+    </a>
+    <a class="nav-item" href="/agents.html" title="Agents">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><path d="M12 8v4M7.5 17.2l3-4.2M16.5 17.2l-3-4.2"/></svg>
+      <span class="nav-label">AGENTS</span>
+    </a>
+  </div>
+
+  <!-- Sidebar mini gauges -->
+  <div class="sidebar-gauges">
+    <div class="mini-gauge" id="sb-cpu">
+      <svg viewBox="0 0 38 38"><circle class="track" cx="19" cy="19" r="16"/><circle class="fill" cx="19" cy="19" r="16" stroke-dasharray="100.5" stroke-dashoffset="100.5"/></svg>
+      <div class="mini-gauge-label"><span class="val">--%</span><span class="lbl">CPU</span></div>
+    </div>
+    <div class="mini-gauge" id="sb-ram">
+      <svg viewBox="0 0 38 38"><circle class="track" cx="19" cy="19" r="16"/><circle class="fill" cx="19" cy="19" r="16" stroke-dasharray="100.5" stroke-dashoffset="100.5"/></svg>
+      <div class="mini-gauge-label"><span class="val">--%</span><span class="lbl">RAM</span></div>
+    </div>
+    <div class="sidebar-conn connected" id="conn-dot"></div>
+  </div>
+</nav>
+
+<!-- ═══════ TOP BAR ═══════ -->
+<header class="top-bar">
+  <div class="top-bar-left">
+    <span class="top-bar-title">SarkhiBot</span>
+    <span class="top-bar-sep">//</span>
+    <span class="top-bar-nav">
+      <a class="top-bar-nav-item active" href="#gauges">SYSTEM</a>
+      <a class="top-bar-nav-item" href="#p-jobs">JOBS</a>
+      <a class="top-bar-nav-item" href="#p-life">LIFE</a>
+      <a class="top-bar-nav-item" href="#p-evo">EVO</a>
+      <a class="top-bar-nav-item" href="#p-mem">MEMORY</a>
+      <a class="top-bar-nav-item" href="#p-logs">LOGS</a>
+      <a class="top-bar-nav-item" href="/agents.html">AGENTS</a>
+    </span>
+  </div>
+  <div class="top-bar-right">
+    <span class="top-bar-conn" id="top-conn"></span>
+    <span><span class="val" id="hdr-status">ONLINE</span></span>
+    <span class="sep">//</span>
+    <span>UP <span class="val" id="hdr-uptime">--</span></span>
+    <span class="sep">//</span>
+    <span>PID <span class="val" id="hdr-pid">--</span></span>
+    <span class="sep">//</span>
+    <span>NODE <span class="val" id="hdr-node">--</span></span>
+    <span class="sep">//</span>
+    <span class="val" id="hdr-clock">--</span>
+  </div>
+</header>
+
+<!-- ═══════ RIGHT BAR ═══════ -->
+<aside class="right-bar">
+  <div class="right-stat" title="Running Jobs">
+    <span class="r-val zero" id="rb-jobs">0</span>
+    <span class="r-lbl">JOBS</span>
+  </div>
+  <div class="right-divider"></div>
+  <div class="right-stat" title="Total Jobs">
+    <span class="r-val zero" id="rb-total-jobs">0</span>
+    <span class="r-lbl">TOTAL</span>
+  </div>
+  <div class="right-divider"></div>
+  <div class="right-stat" title="Life Engine">
+    <span class="r-dot off" id="rb-life-dot"></span>
+    <span class="r-lbl">LIFE</span>
+  </div>
+  <div class="right-divider"></div>
+  <div class="right-stat" title="Activities">
+    <span class="r-val zero" id="rb-activities">0</span>
+    <span class="r-lbl">ACTS</span>
+  </div>
+  <div class="right-divider"></div>
+  <div class="right-stat" title="Memories">
+    <span class="r-val zero" id="rb-mem">0</span>
+    <span class="r-lbl">MEM</span>
+  </div>
+  <div class="right-divider"></div>
+  <div class="right-stat" title="Share Queue">
+    <span class="r-val zero" id="rb-shares">0</span>
+    <span class="r-lbl">SHARE</span>
+  </div>
+  <div class="right-divider"></div>
+  <div class="right-stat" title="Evolution Proposals">
+    <span class="r-val zero" id="rb-evo">0</span>
+    <span class="r-lbl">EVO</span>
+  </div>
+  <div class="right-divider"></div>
+  <div class="right-stat" title="Conversations">
+    <span class="r-val zero" id="rb-convs">0</span>
+    <span class="r-lbl">CHATS</span>
+  </div>
+  <div class="right-bar-clock" id="rb-clock">--:--</div>
+</aside>
+
+<!-- ═══════ MAIN ═══════ -->
+<div class="main">
+
+  <!-- Hero bar -->
+  <div class="hero-bar">
+    <canvas id="waveform-canvas"></canvas>
+    <div class="hero-pulse">
+      <div class="pulse-stat">
+        <span class="pulse-label">BRAIN</span>
+        <span class="pulse-val" id="pulse-brain">--</span>
+      </div>
+      <div class="pulse-stat">
+        <span class="pulse-label">ACTIVITY</span>
+        <span class="pulse-val idle" id="pulse-activity">IDLE</span>
+      </div>
+      <div class="pulse-stat">
+        <span class="pulse-label">JOBS</span>
+        <span class="pulse-val idle" id="pulse-jobs">0</span>
+      </div>
+      <div class="pulse-stat">
+        <span class="pulse-label">CPU</span>
+        <span class="pulse-val" id="pulse-cpu">--%</span>
+      </div>
+      <div class="pulse-stat">
+        <span class="pulse-label">HEAP</span>
+        <span class="pulse-val" id="pulse-heap">--</span>
+      </div>
+      <div class="pulse-stat">
+        <span class="pulse-label">UPTIME</span>
+        <span class="pulse-val" id="pulse-uptime">--</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Integration Status Bar -->
+  <div class="integrations-bar" id="integrations-bar"></div>
+
+  <!-- Gauge row -->
+  <div class="gauge-row" id="gauges">
+    <div class="gauge-widget">
+      <div class="gauge-ring" id="g-cpu1">
+        <svg viewBox="0 0 90 90"><circle class="track" cx="45" cy="45" r="38"/><circle class="fill" cx="45" cy="45" r="38" stroke-dasharray="238.8" stroke-dashoffset="238.8"/></svg>
+        <div class="gauge-center"><span class="pct">--%</span><span class="sub">--</span></div>
+      </div>
+      <div class="gauge-label">CPU 1M</div>
+    </div>
+    <div class="gauge-widget">
+      <div class="gauge-ring" id="g-cpu5">
+        <svg viewBox="0 0 90 90"><circle class="track" cx="45" cy="45" r="38"/><circle class="fill" cx="45" cy="45" r="38" stroke-dasharray="238.8" stroke-dashoffset="238.8"/></svg>
+        <div class="gauge-center"><span class="pct">--%</span><span class="sub">--</span></div>
+      </div>
+      <div class="gauge-label">CPU 5M</div>
+    </div>
+    <div class="gauge-widget">
+      <div class="gauge-ring" id="g-ram">
+        <svg viewBox="0 0 90 90"><circle class="track" cx="45" cy="45" r="38"/><circle class="fill" cx="45" cy="45" r="38" stroke-dasharray="238.8" stroke-dashoffset="238.8"/></svg>
+        <div class="gauge-center"><span class="pct">--%</span><span class="sub">--</span></div>
+      </div>
+      <div class="gauge-label">RAM</div>
+    </div>
+    <div class="gauge-widget">
+      <div class="gauge-ring" id="g-heap">
+        <svg viewBox="0 0 90 90"><circle class="track" cx="45" cy="45" r="38"/><circle class="fill" cx="45" cy="45" r="38" stroke-dasharray="238.8" stroke-dashoffset="238.8"/></svg>
+        <div class="gauge-center"><span class="pct">--%</span><span class="sub">--</span></div>
+      </div>
+      <div class="gauge-label">HEAP</div>
+    </div>
+  </div>
+
+  <!-- Content grid -->
+  <div class="content">
+
+    <!-- ══ TOP ROW: 3 hero panels ══ -->
+
+    <!-- CAPABILITIES -->
+    <div class="panel span-4" id="p-caps">
+      <div class="sweep"></div>
+      <div class="panel-header"><span class="dot"></span>CAPABILITIES<span class="tag" id="caps-tag">WORKERS</span></div>
+      <div class="panel-body" id="caps-body"></div>
+    </div>
+
+    <!-- LIFE -->
+    <div class="panel span-4" id="p-life">
+      <div class="sweep"></div>
+      <div class="panel-header"><span class="dot"></span>LIFE.ENGINE<span class="tag">AUTONOMOUS</span></div>
+      <div class="panel-body" id="life-body"></div>
+    </div>
+
+    <!-- MEMORY -->
+    <div class="panel span-4" id="p-mem">
+      <div class="sweep"></div>
+      <div class="panel-header"><span class="dot"></span>MEMORY.BANK<span class="tag" id="mem-tag">EPISODIC</span></div>
+      <div class="panel-tabs" id="mem-tabs">
+        <span class="panel-tab active" data-tab="episodic">EPISODIC</span>
+        <span class="panel-tab" data-tab="knowledge">KNOWLEDGE</span>
+      </div>
+      <div class="panel-body" id="mem-body"></div>
+    </div>
+
+    <!-- ══ SECOND ROW ══ -->
+
+    <!-- JOBS (wide) -->
+    <div class="panel span-8" id="p-jobs">
+      <div class="sweep"></div>
+      <div class="panel-header"><span class="dot"></span>JOBS<span class="tag" id="jobs-count-tag">SWARM // 0</span></div>
+      <div class="panel-body" id="jobs-body"></div>
+    </div>
+
+    <!-- CONFIG -->
+    <div class="panel span-4">
+      <div class="sweep"></div>
+      <div class="panel-header"><span class="dot"></span>NEURAL.CONFIG<span class="tag">SETTINGS</span></div>
+      <div class="panel-body" id="config-body"></div>
+    </div>
+
+    <!-- ══ THIRD ROW ══ -->
+
+    <!-- EVOLUTION -->
+    <div class="panel span-6" id="p-evo">
+      <div class="sweep"></div>
+      <div class="panel-header"><span class="dot"></span>EVOLUTION<span class="tag">SELF-IMPROVE</span></div>
+      <div class="panel-body" id="evo-body"></div>
+    </div>
+
+    <!-- JOURNAL -->
+    <div class="panel span-6">
+      <div class="sweep"></div>
+      <div class="panel-header"><span class="dot"></span>JOURNAL<span class="tag" id="journal-tag">TODAY</span></div>
+      <div class="panel-tabs" id="journal-tabs"></div>
+      <div class="panel-body" id="journal-body"></div>
+    </div>
+
+    <!-- ══ FOURTH ROW ══ -->
+
+    <!-- AUTOMATIONS -->
+    <div class="panel span-4">
+      <div class="sweep"></div>
+      <div class="panel-header"><span class="dot"></span>AUTOMATIONS<span class="tag">SCHEDULER</span></div>
+      <div class="panel-body short" id="auto-body"></div>
+    </div>
+
+    <!-- IDEAS BACKLOG -->
+    <div class="panel span-4" id="p-ideas">
+      <div class="sweep"></div>
+      <div class="panel-header"><span class="dot"></span>IDEAS.BACKLOG<span class="tag" id="ideas-tag">BRAIN</span></div>
+      <div class="panel-body short" id="ideas-body"></div>
+    </div>
+
+    <!-- LESSONS -->
+    <div class="panel span-4" id="p-lessons">
+      <div class="sweep"></div>
+      <div class="panel-header"><span class="dot"></span>LESSONS<span class="tag" id="lessons-tag">WISDOM</span></div>
+      <div class="panel-body short" id="lessons-body"></div>
+    </div>
+
+    <!-- ══ FIFTH ROW ══ -->
+
+    <!-- SHARES -->
+    <div class="panel span-4">
+      <div class="sweep"></div>
+      <div class="panel-header"><span class="dot"></span>SHARE.QUEUE<span class="tag" id="shares-tag">OUTBOUND</span></div>
+      <div class="panel-tabs" id="shares-tabs">
+        <span class="panel-tab active" data-tab="pending">PENDING</span>
+        <span class="panel-tab" data-tab="shared">HISTORY</span>
+      </div>
+      <div class="panel-body short" id="shares-body"></div>
+    </div>
+
+    <!-- CHARACTER -->
+    <div class="panel span-4">
+      <div class="sweep"></div>
+      <div class="panel-header"><span class="dot"></span>CHARACTER<span class="tag">PERSONA</span></div>
+      <div class="panel-body short" id="char-body"></div>
+    </div>
+
+    <!-- CONVERSATIONS -->
+    <div class="panel span-4">
+      <div class="sweep"></div>
+      <div class="panel-header"><span class="dot"></span>CONVERSATIONS<span class="tag">CHANNELS</span></div>
+      <div class="panel-body short" id="conv-body"></div>
+    </div>
+
+    <!-- ══ SIXTH ROW ══ -->
+
+    <!-- SELF.AWARENESS -->
+    <div class="panel span-6">
+      <div class="sweep"></div>
+      <div class="panel-header"><span class="dot"></span>SELF.AWARENESS<span class="tag">IDENTITY</span></div>
+      <div class="panel-body short" id="self-body"></div>
+    </div>
+
+    <!-- SELF.GOALS -->
+    <div class="panel span-6">
+      <div class="sweep"></div>
+      <div class="panel-header"><span class="dot"></span>SELF.GOALS<span class="tag">ASPIRATION</span></div>
+      <div class="panel-body short" id="self-goals-body"></div>
+    </div>
+
+    <!-- LOG STREAM (full) -->
+    <div class="panel span-12" id="p-logs">
+      <div class="sweep"></div>
+      <div class="panel-header"><span class="dot"></span>LOG.STREAM<span class="tag">REAL-TIME</span></div>
+      <div class="panel-body tall" id="logs-body"></div>
+    </div>
+
+  </div>
+
+
+</div>
+
+<!-- Scrolling log ticker (sticky bottom) -->
+<div class="log-ticker" id="log-ticker">
+  <div class="ticker-label"><span class="dot-pulse"></span>LIVE</div>
+  <div class="ticker-track" id="ticker-track"></div>
+</div>
+
+<script src="shared.js"></script>
+<script src="dashboard.js"></script>
+</body>
+</html>

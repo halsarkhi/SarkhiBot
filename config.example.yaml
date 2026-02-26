@@ -1,0 +1,107 @@
+# SarkhiBot Configuration
+# Copy to config.yaml and adjust as needed.
+
+bot:
+  name: SarkhiBot
+  description: AI engineering agent with full OS control
+
+orchestrator:
+  provider: anthropic    # anthropic | openai | google | groq — switchable via /orchestrator
+  # model: claude-opus-4-6
+
+brain:
+  provider: anthropic    # anthropic | openai | google | groq — switchable via /brain
+  model: claude-sonnet-4-20250514
+  max_tokens: 8192
+  temperature: 0.3
+  max_tool_depth: 25
+
+claude_code:
+  # model: claude-opus-4-6           # switchable via /claudemodel
+  max_turns: 50
+  timeout_seconds: 600
+  # auth_mode: system                # system | api_key | oauth_token — switchable via /claude
+  # workspace_dir: /tmp/sarkhibot-workspaces  # default: ~/.sarkhibot/workspaces
+
+github:
+  default_branch: main
+  # default_org: my-org
+
+jira:
+  # base_url: https://yourcompany.atlassian.net  # or self-hosted JIRA server URL
+  # email: you@company.com                       # JIRA account email (Cloud) or username (Server)
+  # api_token: your-api-token                    # API token from https://id.atlassian.net/manage-profile/security/api-tokens
+
+# LinkedIn — token-based integration for posting, reading, and engaging
+# 1. Go to https://www.linkedin.com/developers/tools/oauth/token-generator
+# 2. Select your app, pick scopes: openid, profile, email, w_member_social
+# 3. Authorize and copy the token
+# 4. Run /linkedin link <token> in Telegram, or set in .env:
+#    LINKEDIN_ACCESS_TOKEN=your-token
+#    LINKEDIN_PERSON_URN is auto-detected when you use /linkedin link
+linkedin:
+
+telegram:
+  # List Telegram user IDs allowed to interact. Empty = deny all.
+  # Set OWNER_TELEGRAM_ID in .env or add IDs here.
+  allowed_users: []
+
+security:
+  blocked_paths:
+    - /etc/shadow
+    - /etc/passwd
+    - ~/.ssh/id_rsa
+    - ~/.ssh/id_ed25519
+
+logging:
+  level: info
+  max_file_size: 5242880  # 5 MB
+
+conversation:
+  max_history: 50
+
+# Voice — ElevenLabs TTS & STT
+# Requires ELEVENLABS_API_KEY in .env
+voice:
+  tts_enabled: true       # Send voice replies alongside text (default: true if API key present)
+  stt_enabled: true        # Transcribe user voice messages (default: true if API key present)
+  # voice_id: JBFqnCBsd6RMkjVDRZzb  # ElevenLabs voice ID (override ELEVENLABS_VOICE_ID env var)
+
+# Inner Life — autonomous thinking, journaling, browsing, creating
+# Data stored at ~/.sarkhibot/life/
+life:
+  enabled: true                  # Enable autonomous inner life
+  min_interval_minutes: 30       # Minimum time between activities
+  max_interval_minutes: 120      # Maximum time between activities
+  activity_weights:              # Relative probability weights
+    think: 30                    # Inner monologue, self-questioning
+    browse: 25                   # Explore interests via web search
+    journal: 20                  # Write daily journal entries
+    create: 15                   # Creative expression (poems, stories, thoughts)
+    self_code: 10                # Self-evolution proposals (requires self_coding.enabled)
+    code_review: 5               # Codebase scanning + PR status checks
+    reflect: 8                   # Read logs, analyze interactions, find improvement patterns
+  cooldown_hours:                # Per-activity cooldowns (hours) before the activity can repeat
+    journal: 4                   # Hours between journal entries
+    reflect: 4                   # Hours between reflection activities
+  proactive_sharing: true        # Share discoveries with users proactively
+  proactive_max_per_day: 3       # Max proactive messages per day
+  memory_retention_days: 90      # Days to keep episodic memories
+  self_coding:
+    enabled: false               # Allow self-evolution (safety-gated, opt-in)
+    branch_prefix: evolution     # Git branch prefix for evolution PRs
+    # repo_remote: Owner/Repo   # GitHub owner/repo for PRs (auto-detected if omitted)
+    cooldown_hours: 2            # Min hours between evolution attempts
+    max_active_prs: 3            # Max concurrent open evolution PRs
+    max_proposals_per_day: 3     # Max new proposals per day
+    allowed_scopes: all          # all | safe | prompts_only
+    code_review_cooldown_hours: 4    # Hours between code review activities
+    codebase_scan_interval_hours: 24 # Hours between full codebase scans
+  quiet_hours:
+    start: 2                     # Hour to start quiet period (no activities)
+    end: 6                       # Hour to end quiet period
+
+# Dashboard — optional cyberpunk terminal monitoring UI
+# dashboard:
+#   enabled: false   # Auto-start dashboard on boot (default: false)
+#   port: 3000       # HTTP port for the dashboard
